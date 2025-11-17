@@ -1,0 +1,61 @@
+/* make the gr.Example image smaller */
+
+div.gallery img {
+  max-width: 120px;
+}
+
+#logo {
+  margin: 0 auto;
+  max-width: 50%;
+  height: auto;
+}
+
+/* #left-panel {
+  background: radial-gradient(#507e01, black);
+  [role="tabpanel"] {
+    border: none;
+  }
+  [role="tablist"] {
+    border: none;
+    [role="tab"] {
+      border: none;
+      font-weight: bolder;
+      &[aria-selected="true"] {
+        color: white;
+        background: unset;
+      }
+    }
+  }
+  .form,
+  .form .block {
+    background: rgba(118, 185, 0, 0.2);
+  }
+} */
+
+.custom-button {
+  background-color: #4CAF50; /* 按钮背景色 */
+  color: white;             /* 按钮文字颜色 */
+  border: none;             /* 移除边框 */
+  padding: 10px 20px;       /* 内边距 */
+  font-size: 16px;          /* 字体大小 */
+  cursor: pointer;          /* 鼠标悬停样式 */
+  border-radius: 5px;       /* 圆角 */
+}
+
+.custom-button:hover {
+  background-color: #45a049; /* 悬停时的背景色 */
+}
+
+.example-button {
+  background-color: #4CAF50; /* 按钮背景色 */
+  color: white;             /* 按钮文字颜色 */
+  border: none;             /* 移除边框 */
+  padding: 10px 20px;       /* 内边距 */
+  font-size: 16px;          /* 字体大小 */
+  cursor: pointer;          /* 鼠标悬停样式 */
+  border-radius: 5px;       /* 圆角 */
+}
+
+.example-button:hover {
+  background-color: #45a049; /* 悬停时的背景色 */
+}
