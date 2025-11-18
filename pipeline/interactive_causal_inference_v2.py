@@ -260,56 +260,15 @@ class InteractiveCausalInferencePipeline(CausalInferencePipeline):
                 crossattn_cache=self.crossattn_cache,
                 current_start=current_start_frame * self.frame_seq_length,
             )
-
-            # denoised_pred: (B, t, C, H, W)  这里 t = self.num_frame_per_block
-            decoded_block = self.vae.decode_to_pixel(denoised_pred.to(noise.device), use_cache=False)
-            decoded_block = (decoded_block * 0.5 + 0.5).clamp(0, 1)  # (B,t,C,H,W)
-            block_thwc = rearrange(decoded_block[0],
-                                   "t c h w -> t h w c").detach().cpu().numpy()  # (t,H,W,C), float32 in [0,1]
-
-            # ✅ 逐帧 yield（而不是每个 block 只 yield 一次）
-            log.info("block_thwc.shape: %s", block_thwc.shape)
-            for f in range(block_thwc.shape[0]):
-                frame_u8 = (block_thwc[f] * 255.0).round().astype("uint8")
-                yield frame_u8
-                print("yield_times", yield_times)
-                yield_times += 1
-
             current_start_frame += current_num_frames
 
-            '''
-            with torch.autocast(device_type=noise.device.type, dtype=torch.bfloat16, enabled=True):
-                decoded_block = self.vae.decode_to_pixel(
-                    denoised_pred.to(noise.device),
-                    use_cache=False
-                )
-            decoded_block = (decoded_block * 0.5 + 0.5).clamp(0, 1)  # B,t,C,H,W in [0,1]
+        video = self.vae.decode_to_pixel(output[:, start_frame:].to(noise.device), use_cache=False)
+        video = (video * 0.5 + 0.5).clamp(0, 1)  # (B, T, C, H, W)
 
-            # 只取第 0 个样本（batch_size==1）
-            block_thwc = rearrange(decoded_block[0], "t c h w -> t h w c").detach().cpu()
-            block_u8 = (block_thwc * 255.0).round().to(torch.uint8).numpy()  # (t, H, W, C)
-
-            # 逐帧送出：每次 yield 一个 (H,W,C) uint8
-            for f in range(block_u8.shape[0]):
-                yield block_u8[f]
-
-            for f in range(block_thwc.shape[0]):
-                frame_u8 = (block_thwc[f] * 255.0).round().astype("uint8")
-                yield frame_u8
-            # Update frame pointer
-            current_start_frame += current_num_frames
-            '''
+        video_thwc = rearrange(video[0], "t c h w -> t h w c").detach().cpu().numpy()
+        for f in range(video_thwc.shape[0]):
+            frame_u8 = (video_thwc[f] * 255.0).round().astype("uint8")
+            yield frame_u8
 
         log.info("output.shape: %s", output.shape)
-
         self.cached_output = output
-
-        '''
-        # Standard decoding
-        video = self.vae.decode_to_pixel(output.to(noise.device), use_cache=False)
-        video = (video * 0.5 + 0.5).clamp(0, 1)
-
-        if return_latents:
-            return video, output
-        return video
-        '''
